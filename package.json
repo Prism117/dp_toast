@@ -4,19 +4,22 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node ultipro.ts"
+    "start": "node dist/toast/dp_journal.js"
   },
   "type": "module",
   "author": "Clay Patten",
   "license": "ISC",
   "devDependencies": {
     "@tsconfig/node18": "^18.2.4",
+    "@types/assert": "^1.5.10",
+    "@types/node": "^20.12.5",
     "@typescript-eslint/eslint-plugin": "^7.4.0",
     "@typescript-eslint/parser": "^7.4.0",
     "eslint": "^8.57.0",
     "typescript": "^5.4.3"
   },
   "dependencies": {
+    "assert": "^2.1.0",
     "axios": "^1.6.8"
   }
 }
