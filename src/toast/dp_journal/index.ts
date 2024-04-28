@@ -3,18 +3,20 @@ import fs from "node:fs";
 //third-party
 import XLSX from "xlsx";
 //project imports
-import { createCSV } from "../util/sheetjs.js";
+import { createCSV } from "../util/io/sheetjs.js";
 import { GetOrderData } from "./apiData.js";
 import { MapOrderData } from "./journal.js";
 
 //TESTING: RUN
-async function main(prop: number, date: string) {
-  const properties: { [id: number]: string } = {
-    828: "9c8dc9a8-4618-4085-b127-cebf13db6d15",
-    830: "6c69a54c-8647-4f95-8f41-7df9e0145099",
-    825: "0ada05d6-ee20-4c08-bbaf-fe575ebe8179",
-  };
+async function main(prop: string, date: string) {
+  console.log("prop", prop);
+  return;
+  //Load Configuration
+  const properties: { [id: string]: string } = JSON.parse(
+    fs.readFileSync("./properties.json", "utf-8")
+  );
   const credentials = JSON.parse(fs.readFileSync("./credentials.json", "utf8"));
+
   const api = new Toast(credentials);
 
   //PARAMS
@@ -49,4 +51,4 @@ async function main(prop: number, date: string) {
   // await createCSV(je, "Journal");
 }
 
-main(825, "2024-04-07");
+main(process.argv[2], process.argv[3]);

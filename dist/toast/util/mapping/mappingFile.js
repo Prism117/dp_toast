@@ -1,5 +1,5 @@
-import Toast from "../api/toast.js";
-import Configuration from "../api/configuration.js";
+import Toast from "../../api/toast.js";
+import Configuration from "../../api/configuration.js";
 import fs from "node:fs";
 import XLSX from "xlsx";
 XLSX.set_fs(fs);
@@ -32,6 +32,12 @@ const MAPTYPES = [
     "Tax",
     "Service Charge",
 ];
+/**
+ * Creates .XLSM file for Mapping
+ * @param api
+ * @param property
+ * @param filePath
+ */
 export default async function createMappingFile(api, property, filePath) {
     try {
         await api.initialize();
@@ -74,7 +80,6 @@ export default async function createMappingFile(api, property, filePath) {
         ["Type", "Key 1", "Key 2", "Key 3", "Custom Description", "GL"],
     ]);
     const maxLength = Math.max(PAYMENTS.length, revenueCenters.length, salesCategories.length, menuGroups.length, taxValues.length, mealPeriods.length);
-    console.log("MAX LEN", maxLength);
     let mapSheetAOA = [];
     for (let i = 0; i < maxLength; i++) {
         let newRow = [];

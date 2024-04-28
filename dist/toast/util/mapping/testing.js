@@ -1,7 +1,7 @@
-import Toast from "./api/toast.js";
+import Toast from "../../api/toast.js";
 import fs from "node:fs";
 import XLSX from "xlsx";
-import createMappingFile from "./util/mappingFile.js";
+import createMappingFile from "./mappingFile.js";
 async function main() {
     const credentials = JSON.parse(fs.readFileSync("./credentials.json", "utf8"));
     const api = new Toast(credentials);
