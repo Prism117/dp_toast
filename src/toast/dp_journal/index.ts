@@ -9,8 +9,6 @@ import { MapOrderData } from "./journal.js";
 
 //TESTING: RUN
 async function main(prop: string, date: string) {
-  console.log("prop", prop);
-  return;
   //Load Configuration
   const properties: { [id: string]: string } = JSON.parse(
     fs.readFileSync("./properties.json", "utf-8")
