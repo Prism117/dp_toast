@@ -11,8 +11,6 @@ type R = {
   returnRes?: boolean;
 };
 
-type ObjectType<T, R> = T extends { returnRes: true } ? AxiosResponse<R> : R;
-
 export default class Toast {
   hostname: string;
   clientID: string;
@@ -48,7 +46,6 @@ export default class Toast {
       returnRes: false,
       ...options,
     };
-    console.log("options", options);
     const url = `https://${this.hostname}${endpoint}`;
     console.log("url", url);
     const headers = {
@@ -56,7 +53,6 @@ export default class Toast {
       Authorization: `Bearer ${this.token}`,
       "Content-Type": "application/json",
     };
-    console.log("headers", headers);
     try {
       const response = await axios.get(url, {
         headers,

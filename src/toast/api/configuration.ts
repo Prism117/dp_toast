@@ -1,6 +1,6 @@
 import { AxiosResponse } from "axios";
 import Toast from "./toast.js";
-import { SalesCategories, TaxRates } from "./type_configuration.js";
+import { SalesCategories, TaxRates } from "../Types/type_configuration.js";
 
 //Acceptable config items
 const VALID_ITEMS = [
@@ -10,11 +10,8 @@ const VALID_ITEMS = [
   "restaurantServices",
   "taxRates",
   "serviceCharges",
+  "alternatePaymentTypes",
 ] as const;
-
-type Mapped = {
-  taxRates: TaxRates;
-};
 
 //Types & Type Checking
 export type ItemsEnum = (typeof VALID_ITEMS)[number];
@@ -31,10 +28,6 @@ function isAssertValid(param: any): asserts param is ItemsEnum {
   }
 }
 
-type MM = {
-  sales: SalesCategories;
-};
-
 export default class Configuration {
   api: Toast;
   property: string;
@@ -45,30 +38,35 @@ export default class Configuration {
   async #fetch_config<T>(endpoint: string): Promise<T[]> {
     const newEndpoint = `/config/v2/${endpoint}`;
     try {
-      const initialData = await this.api.fetch<any>(
+      const initialData = await this.api.fetch<AxiosResponse>(
         this.property,
         newEndpoint,
         {
           returnRes: true,
         }
       );
-      console.log("init", initialData);
       let data: T[] = initialData.data;
-      const headers: {} = initialData.headers;
-      let hasNextPage = headers.hasOwnProperty("Toast-Next-Page-Token");
+      const NEXT_PAGE_HEADER = "toast-next-page-token" as const;
+      let hasNextPage = initialData.headers.hasOwnProperty(NEXT_PAGE_HEADER);
+      if (!hasNextPage) {
+        return data;
+      }
+      let headers = initialData.headers;
       while (hasNextPage) {
-        const nextRes: AxiosResponse = await this.api.fetch<any>(
+        const nextRes = await this.api.fetch<AxiosResponse>(
           this.property,
           newEndpoint,
           {
             returnRes: true,
+            params: { pageToken: headers[NEXT_PAGE_HEADER] },
           }
         );
         if (!(nextRes instanceof Object)) {
           throw Error("");
         }
-        data.push(nextRes.data);
-        hasNextPage = nextRes.headers.hasOwnProperty("Toast-Next-Page-Token");
+        data.push(...nextRes.data);
+        hasNextPage = nextRes.headers.hasOwnProperty(NEXT_PAGE_HEADER);
+        headers = hasNextPage ? nextRes.headers : {};
       }
       return data;
     } catch (error) {
@@ -101,7 +99,7 @@ export default class Configuration {
       }
       const data = await this.#fetch_config<typeof name>(name);
       const hashItems = customHash.hasOwnProperty(name) ? customHash[name] : "";
-      const hash = this.createHash(data, hashItems);
+      const hash = await this.createHash(data, hashItems);
       config[name] = hash;
     }
     return config;

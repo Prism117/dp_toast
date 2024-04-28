@@ -1,0 +1,18 @@
+[
+  { "type": "Payment", "key1": "VISA", "gl": "000000000" },
+  {
+    "type": "Sales Category",
+    "key1": "Rosette's",
+    "key2": "Breakfast",
+    "key3": "Food",
+    "gl": "000000000"
+  },
+  {
+    "type": "Menu Group",
+    "key1": "Rosette's",
+    "key2": "Lunch",
+    "key3": "Food",
+    "gl": "000000000"
+  },
+  { "type": "Tax", "key1": "KYSales", "gl": "000000000" }
+]

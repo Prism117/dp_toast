@@ -6,6 +6,7 @@ const VALID_ITEMS = [
     "restaurantServices",
     "taxRates",
     "serviceCharges",
+    "alternatePaymentTypes",
 ];
 function isAssertValid(param) {
     if (!param ||
@@ -27,16 +28,24 @@ export default class Configuration {
             const initialData = await this.api.fetch(this.property, newEndpoint, {
                 returnRes: true,
             });
-            console.log("init", initialData);
             let data = initialData.data;
-            const headers = initialData.headers;
-            let hasNextPage = headers.hasOwnProperty("Toast-Next-Page-Token");
+            const NEXT_PAGE_HEADER = "toast-next-page-token";
+            let hasNextPage = initialData.headers.hasOwnProperty(NEXT_PAGE_HEADER);
+            if (!hasNextPage) {
+                return data;
+            }
+            let headers = initialData.headers;
             while (hasNextPage) {
                 const nextRes = await this.api.fetch(this.property, newEndpoint, {
                     returnRes: true,
+                    params: { pageToken: headers[NEXT_PAGE_HEADER] },
                 });
-                data.push(nextRes.data);
-                hasNextPage = nextRes.headers.hasOwnProperty("Toast-Next-Page-Token");
+                if (!(nextRes instanceof Object)) {
+                    throw Error("");
+                }
+                data.push(...nextRes.data);
+                hasNextPage = nextRes.headers.hasOwnProperty(NEXT_PAGE_HEADER);
+                headers = hasNextPage ? nextRes.headers : {};
             }
             return data;
         }
@@ -66,7 +75,7 @@ export default class Configuration {
             }
             const data = await this.#fetch_config(name);
             const hashItems = customHash.hasOwnProperty(name) ? customHash[name] : "";
-            const hash = this.createHash(data, hashItems);
+            const hash = await this.createHash(data, hashItems);
             config[name] = hash;
         }
         return config;
