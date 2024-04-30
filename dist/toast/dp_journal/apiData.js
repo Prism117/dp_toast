@@ -73,7 +73,7 @@ export async function GetOrderData(api, property, businessDate) {
     for (const order of orders) {
         //Order-level Properties
         const revenueCenter = settings.revenueCenters.get(order.revenueCenter?.guid) || "UNKNOWN RC";
-        const mealPeriod = settings.restaurantServices.get(order.restaurantService.guid) ||
+        const mealPeriod = settings.restaurantServices.get(order.restaurantService?.guid) ||
             "UNKNOWN MP";
         //* Handle Covers
         const numGuests = order.numberOfGuests;

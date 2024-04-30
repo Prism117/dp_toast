@@ -5,7 +5,8 @@ export interface MappingArray {
     | "Payment"
     | "Tax"
     | "Tips"
-    | "Service Charge";
+    | "Service Charge"
+    | "Stats";
   key1: string;
   key2?: string;
   key3?: string;
@@ -29,10 +30,15 @@ export type JournalItem = {
   amount: number;
   reference?: string;
   description: string;
-  date: Date;
+  date: string;
   month: number;
   year: number;
   journalCode: string;
+  user?: string;
+  units?: number | string;
+  propID?: string;
+  reverse?: string;
+  comments?: string;
 };
 
 export type MappableItems = {

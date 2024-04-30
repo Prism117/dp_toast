@@ -10,7 +10,7 @@ import {
  * @param {Object} data
  * @param {Object[]} mapping
  */
-//! As items get mapped remove from values
+//! As items get mapped remove from data
 export async function MapOrderData(
   data: MappableItems[],
   itemProps: ItemProps,
@@ -20,6 +20,7 @@ export async function MapOrderData(
   let journal = new Array<JournalItem>();
   const month = date.getMonth() + 1;
   const year = date.getFullYear();
+  const dateStr = date.toLocaleDateString();
   for (const mappedItem of mapping) {
     console.log("Data Length", data.length);
     switch (mappedItem.type) {
@@ -57,11 +58,14 @@ export async function MapOrderData(
               journal.push({
                 gl: mappedItem.gl,
                 amount: item.amount,
-                date,
+                reference: "",
+                date: dateStr,
                 description,
                 month,
                 year,
                 journalCode: "TOAST",
+                user: "",
+                units: "",
               });
             } else {
               journal[jeIndex].amount += item.amount;
@@ -72,26 +76,53 @@ export async function MapOrderData(
         data = data.filter((x) => !mappedKeys.includes(x.key));
       }
 
-      case "Payment": {
-        const { key1: payKey, gl } = mappedItem;
+      case "Stats": {
+        continue;
+      }
+      //Skip Keys
+      case "Tips": {
+        const tipItem = data.find((x) => x.type === "Tips");
+        if (!tipItem) {
+          continue;
+        }
+        journal.push({
+          gl: mappedItem.gl,
+          amount: tipItem?.amount,
+          reference: "",
+          description: "Tips",
+          date: dateStr,
+          month,
+          year,
+          journalCode: "TOAST",
+          user: "",
+          units: "",
+        });
+        data = data.filter((x) => x.type !== "Tips");
+      }
+
+      default: {
+        const { key1: primaryKey, gl } = mappedItem;
         const payData = data.find(
-          (x) => x.type === "Payment" && x.key === payKey
+          (x) => x.type === "Payment" && x.key === primaryKey
         );
         if (!payData) {
           continue;
         }
-        const jeIndex = journal.findIndex((x) => x.description === payKey);
+        const jeIndex = journal.findIndex((x) => x.description === primaryKey);
         if (jeIndex === -1) {
           journal.push({
             gl,
             amount: payData.amount,
-            date,
-            description: payKey,
+            reference: "",
+            date: dateStr,
+            description: primaryKey,
             month,
             year,
             journalCode: "TOAST",
+            user: "",
+            units: "",
           });
-          data = data.filter((x) => x.key != payKey);
+          data = data.filter((x) => x.key != primaryKey);
         } else {
           throw Error("Duplicate Payment Keys");
         }
@@ -101,6 +132,26 @@ export async function MapOrderData(
 
   //TODO: Handle Unmapped Items - What's in Data still
   for (const remItem of data) {
+    let description: string;
+    if (remItem.type === "Item") {
+      const { salesCategory, menuGroup } = itemProps.get(remItem.key) || {};
+      const [revenueCenter, mealPeriod] = remItem.key.split("|");
+      description = `Unmapped Item: ${salesCategory} OR ${menuGroup} Rev: ${revenueCenter} MP: ${mealPeriod}`;
+      //TODO: Check if already mapped
+    } else {
+      description = `Unmapped ${remItem.type}: ${remItem.key}`;
+    }
+    journal.push({
+      gl: "999999",
+      amount: remItem.type === "Stats" ? 0 : remItem.amount,
+      description,
+      date: dateStr,
+      month,
+      year,
+      journalCode: "TOAST",
+      user: "",
+      units: remItem.type === "Stats" ? remItem.amount : "",
+    });
   }
 
   return journal;

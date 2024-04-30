@@ -107,7 +107,7 @@ export async function GetOrderData(
     const revenueCenter =
       settings.revenueCenters.get(order.revenueCenter?.guid) || "UNKNOWN RC";
     const mealPeriod =
-      settings.restaurantServices.get(order.restaurantService.guid) ||
+      settings.restaurantServices.get(order.restaurantService?.guid) ||
       "UNKNOWN MP";
 
     //* Handle Covers
